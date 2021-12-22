@@ -110,15 +110,17 @@ public:
 			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
 				auto paireTemporaire = iter->second;
 				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second;
+				if(distCourante < distance[graph.getIDSommet(graph.getPosition(iter->first))]){
+					distance[graph.getIDSommet(graph.getPosition(iter->first))] = distCourante;
+				}
 			}
-			graph.sommets[graph.getIDSommet(position)].areteSortantes;
 		}
 
 
 	}
 
 	int plusPetit(int distance[], vector<Position> visite){
-		int minimum = 10000000, valeurDeRetour;
+		int minimum = 10000000, valeurDeRetour = 100000000;
 		for(int i = 0; i < visite.size(); i++){
 			if(distance[i] <= minimum){
 				minimum = distance[i];
@@ -166,14 +168,15 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 	int couleurSommet;
 
 	for(int i = 0; i < univers.graph.sommets.size(); i++){
-		if(i-univers.N >= 0)
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, make_pair('g',1));
+		Position p = univers.graph.sommets[i].position;
+		if(i-univers.N >= 0 && i / (univers.N * univers.N) == (i - univers.N) / (univers.N * univers.N))
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, make_pair('h',1));
 		if((i+1) % univers.N != 0) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+1].position, make_pair('h',1));
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+1].position, make_pair('d',1));
 		if(i+univers.N < univers.graph.sommets.size()) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+univers.N].position, make_pair('d',1));
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+univers.N].position, make_pair('b',1));
 		if((i-1) % univers.N == 6) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-1].position, make_pair('b',1));
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-1].position, make_pair('g',1));
 
 		couleurUnivers = univers.graph.sommets[i].position.c;
 		couleurSommet = univers.graph.sommets[i].position.couleur;
