@@ -24,7 +24,7 @@ class Graph{
 		map<P, int> indices;
 		vector<Sommet> sommets;
 		void ajouterSommet(const P& p){
-			assert(!indices.count(s) == 0);
+			assert(!indices.count(p) == 0);
 			int indice  = indices.size();
 			indices[p] = indice;
 			sommets.push_back(Sommet(p));
@@ -51,6 +51,8 @@ public:
 		y = y_;
 		c = c_;
 	}
+
+	friend
 };
 
 
@@ -122,8 +124,6 @@ int main(int argc, char const *argv[])
 	unsigned int couleur_depart = atoi(argv[4]);
 	unsigned int x_destination = atoi(argv[5]);
 	unsigned int y_destination = atoi(argv[6]);
-
-	univers.afficher();
 	univers.plusCourtChemin( x_depart, y_depart, couleur_depart, x_destination, y_destination );
 
 	return 0;
