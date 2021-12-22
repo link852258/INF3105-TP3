@@ -35,16 +35,26 @@ class Graph{
 			int ib = indices[b];
 			sommets[ia].areteSortantes[ib] = etiquette;
 		}
+
+		int getIDSommet(const P& a){
+			int ia = indices[a];
+			return ia;
+		}
+
+		P getPosition(const int& index){
+			return sommets[index].position;
+		}
 };
 
 class Position{
 	public:
-		int couleur;
+		int couleur; // couleur du sommet
 		int x;
 		int y;
-		int c;
+		int c; // couleur de l'univers
 
 public:
+	Position(){}
 	Position(const int& couleur_, const int& x_, const int& y_, const int& c_){
 		couleur = couleur_;
 		x = x_;
@@ -80,8 +90,44 @@ public:
 
 	void plusCourtChemin(int x_depart, int y_depart, int couleur_depart, int x_destination, int y_destination) {
 		std::cerr << "TODO : calculer le plus court chemin depuis (" << x_depart << ", " << y_depart << ") avec la couleur " << couleur_depart << " vers (" << x_destination << ", " << y_destination << ")" << std::endl;
-		// TODO...
+		int distance[graph.sommets.size()];
+		Position precedent[graph.sommets.size()];
+		vector<Position> visite;
+		Position nonVisite[graph.sommets.size()];
+		for(int i = 0; i < graph.sommets.size(); i++){
+			distance[i] = 1000000;
+			visite.push_back(graph.sommets[i].position);
+		}
+		int index = graph.getIDSommet(Position(0, x_depart, y_depart, couleur_depart));
+		distance[index] = 0;
+
+		while(!visite.empty()){
+			int index = plusPetit(distance, visite);
+			Position position = visite[index];
+			visite.erase(visite.begin()+index);
+			auto mapArete = graph.sommets[graph.getIDSommet(position)].areteSortantes;
+			int distCourante;
+			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
+				auto paireTemporaire = iter->second;
+				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second
+			}
+			graph.sommets[graph.getIDSommet(position)].areteSortantes;
+		}
+
+
 	}
+
+	int plusPetit(int distance[], vector<Position> visite){
+		int minimum = 10000000, valeurDeRetour;
+		for(int i = 0; i < visite.size(); i++){
+			if(distance[i] <= minimum){
+				minimum = distance[i];
+				valeurDeRetour = i;
+			}
+		}
+		return valeurDeRetour;
+	}
+
 	friend std::istream& operator >> (std::istream& is, Univers& recette);
 };
 
@@ -95,7 +141,7 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 	assert(univers.C > 0);
 
 	vector<int> vectorCouleur;
-
+	//couleur des sommets
 	for(int i = 0; i < univers.N*univers.N; i++){
 		int couleur;
 		is >> couleur;
