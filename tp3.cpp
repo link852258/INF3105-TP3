@@ -76,7 +76,7 @@ class Univers
 	public:
 	int N; 	// Nombre de ligne et nombre de colonnes
 	int C; 	// Nombre de couleur
-	Graph<Position, int> graph;
+	Graph<Position, pair<char, int>> graph;
 	// TODO : Complétez avec les attributs nécessaires pour représenter l'univers
 
 public:
@@ -109,7 +109,7 @@ public:
 			int distCourante;
 			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
 				auto paireTemporaire = iter->second;
-				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second
+				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second;
 			}
 			graph.sommets[graph.getIDSommet(position)].areteSortantes;
 		}
@@ -167,22 +167,22 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 
 	for(int i = 0; i < univers.graph.sommets.size(); i++){
 		if(i-univers.N >= 0)
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, 1);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, make_pair('g',1));
 		if((i+1) % univers.N != 0) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+1].position, 1);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+1].position, make_pair('h',1));
 		if(i+univers.N < univers.graph.sommets.size()) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+univers.N].position, 1);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+univers.N].position, make_pair('d',1));
 		if((i-1) % univers.N == 6) 
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-1].position, 1);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-1].position, make_pair('b',1));
 
 		couleurUnivers = univers.graph.sommets[i].position.c;
 		couleurSommet = univers.graph.sommets[i].position.couleur;
 
 		if(couleurSommet != couleurUnivers && couleurSommet < couleurUnivers){
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i - (couleurUnivers-couleurSommet*univers.N*univers.N)].position, 2);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i - (couleurUnivers-couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
 		}
 		if(couleurSommet != couleurUnivers && couleurSommet > couleurUnivers){
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (couleurUnivers+couleurSommet*univers.N*univers.N)].position, 2);
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (couleurUnivers+couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
 		}
 	}
 
