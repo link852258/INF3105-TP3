@@ -24,7 +24,7 @@ class Graph{
 		map<P, int> indices;
 		vector<Sommet> sommets;
 		void ajouterSommet(const P& p){
-			assert(!indices.count(s) == 0);
+			assert(indices.count(p) == 0);
 			int indice  = indices.size();
 			indices[p] = indice;
 			sommets.push_back(Sommet(p));
@@ -51,6 +51,13 @@ public:
 		y = y_;
 		c = c_;
 	}
+
+	friend bool operator<(const Position& p1, const Position& p2)
+    {
+		if(p1.c < p2.c || p1.x < p2.x || p1.y < p2.y)
+			return true;
+        return false;
+    }
 };
 
 
@@ -95,12 +102,13 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 				is >> couleur;
 				Position position(couleur, j, i, c);
 				univers.graph.ajouterSommet(position);
+				cout << position.x << "," << position.y << " " << position.c << "   ";
 				//std::cerr << "TODO : considérer la cellule (" << x << ", " << y << ") est de couleur " << couleur << std::endl;
 			}
+			cout << endl;
 		}
+		cout << endl;
 	}
-
-	
 	return is;
 }
 
@@ -123,7 +131,6 @@ int main(int argc, char const *argv[])
 	unsigned int x_destination = atoi(argv[5]);
 	unsigned int y_destination = atoi(argv[6]);
 
-	univers.afficher();
 	univers.plusCourtChemin( x_depart, y_depart, couleur_depart, x_destination, y_destination );
 
 	return 0;
