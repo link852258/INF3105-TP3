@@ -10,28 +10,35 @@
 
 using namespace std;
 
-class Sommet{
 
+
+template <class S, class A>
+class Graph{
 	public:
-		int couleur;
-		bool visite;
-		vector<Arete> aretes;
-		int distance;
-		Sommet(int _couleur, int _distance): couleur(_couleur), distance(_distance) {
-			visite = false;
+		struct Sommet{
+			Sommet(const S& s_, const &int x_, const &int y_, const &int c_) : couleur(s_){}
+			S couleur;
+			int x;
+			int y;
+			int c;
+			map<int, A> areteSortantes;
+			map<int, A> areteEntrantes; 
+		};
+		map<S, int> indices;
+		vector<Sommet> sommets;
+		void ajouterSommet(const S& s){
+			assert(!indices.count(s) == 0);
+			int indice  = indices.size();
+			indices[s] = indice;
+			sommets.push_back(Sommet(s));
 		}
 
-		void ajouterArete(Arete a){
-			aretes.push_back(a);
+		void ajouterArete(const S& a, const S& b, const A& etiquette){
+			int ia = indices[a];
+			int ib = indices[b];
+			sommets[ia].areteSortantes[ib] = etiquette;
+			sommets[ib].areteEntrantes[ia] = etiquette;
 		}
-};
-
-class Arete{
-
-	public:
-		Sommet sommet;
-		int distance;
-		char direction;
 };
 
 
@@ -40,8 +47,6 @@ class Univers
 	public:
 	unsigned int N; 	// Nombre de ligne et nombre de colonnes
 	unsigned int C; 	// Nombre de couleur
-	vector<vector<Sommet>> matriceSommet;
-	vector<vector<vector<Sommet>>> vectorDeMatriceSommet;
 	// TODO : Complétez avec les attributs nécessaires pour représenter l'univers
 
 public:
@@ -57,20 +62,6 @@ public:
 		std::cerr << "TODO : calculer le plus court chemin depuis (" << x_depart << ", " << y_depart << ") avec la couleur " << couleur_depart << " vers (" << x_destination << ", " << y_destination << ")" << std::endl;
 		// TODO...
 	}
-
-	void afficher(){
-		for(int i = 0; i < C; i++){
-			for(unsigned int y = 0; y<N; y++) {
-				for(unsigned int x = 0; x<N; x++) {
-					cout << vectorDeMatriceSommet[i][y][x].couleur;
-				}
-				cout << endl;
-			}
-				cout << endl;
-				cout << endl;
-		}
-	}
-
 	friend std::istream& operator >> (std::istream& is, Univers& recette);
 };
 
