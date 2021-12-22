@@ -12,33 +12,45 @@ using namespace std;
 
 
 
-template <class S, class A>
+template <class P, class A>
 class Graph{
 	public:
 		struct Sommet{
-			Sommet(const S& s_, const &int x_, const &int y_, const &int c_) : couleur(s_){}
-			S couleur;
-			int x;
-			int y;
-			int c;
+			Sommet(const P& p_) : position(p_){}
+			P position;
 			map<int, A> areteSortantes;
-			map<int, A> areteEntrantes; 
 		};
-		map<S, int> indices;
+
+		map<P, int> indices;
 		vector<Sommet> sommets;
-		void ajouterSommet(const S& s){
+		void ajouterSommet(const P& p){
 			assert(!indices.count(s) == 0);
 			int indice  = indices.size();
-			indices[s] = indice;
-			sommets.push_back(Sommet(s));
+			indices[p] = indice;
+			sommets.push_back(Sommet(p));
 		}
 
-		void ajouterArete(const S& a, const S& b, const A& etiquette){
+		void ajouterArete(const P& a, const P& b, const A& etiquette){
 			int ia = indices[a];
 			int ib = indices[b];
 			sommets[ia].areteSortantes[ib] = etiquette;
-			sommets[ib].areteEntrantes[ia] = etiquette;
 		}
+};
+
+class Position{
+	public:
+		int couleur;
+		int x;
+		int y;
+		int c;
+
+public:
+	Position(const int& couleur_, const int& x_, const int& y_, const int& c_){
+		couleur = couleur_;
+		x = x_;
+		y = y_;
+		c = c_;
+	}
 };
 
 
@@ -47,11 +59,12 @@ class Univers
 	public:
 	unsigned int N; 	// Nombre de ligne et nombre de colonnes
 	unsigned int C; 	// Nombre de couleur
+	Graph<Position, int> graph;
 	// TODO : Complétez avec les attributs nécessaires pour représenter l'univers
 
 public:
 	Univers() {
-
+		
 	}
 
 	~Univers() {
@@ -73,24 +86,21 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 
 	assert(univers.N > 0);
 	assert(univers.C > 0);
-	
 
-	for(unsigned int y = 0; y<univers.N; y++) {
-		vector<Sommet> vs;
-		for(unsigned int x = 0; x<univers.N; x++) {
-			unsigned int couleur;
-			is >> couleur;
-			//std::cerr << "TODO : considérer la cellule (" << x << ", " << y << ") est de couleur " << couleur << std::endl;
-			Sommet sommet(couleur, 100000);
-			vs.push_back(sommet);
+	for(unsigned int c = 0; c<univers.C; c++){
+
+		for(unsigned int i = 0; i<univers.N; i++) {
+			for(unsigned int j = 0; j<univers.N; j++) {
+				unsigned int couleur;
+				is >> couleur;
+				Position position(couleur, j, i, c);
+				univers.graph.ajouterSommet(position);
+				//std::cerr << "TODO : considérer la cellule (" << x << ", " << y << ") est de couleur " << couleur << std::endl;
+			}
 		}
-		univers.matriceSommet.push_back(vs);
 	}
 
-	for(int i = 0; i < univers.C; i++){
-		univers.vectorDeMatriceSommet.push_back(univers.matriceSommet);
-	}
-	univers.matriceSommet.clear();
+	
 	return is;
 }
 
