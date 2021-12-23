@@ -1,3 +1,6 @@
 .vscode/
 *.o
 tp3
+map*
+solution
+verif

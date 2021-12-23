@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -52,25 +53,33 @@ class Position{
 		int x;
 		int y;
 		int c; // couleur de l'univers
+		int n;
 
 public:
 	Position(){}
-	Position(const int& couleur_, const int& x_, const int& y_, const int& c_){
+	Position(const int& couleur_, const int& x_, const int& y_, const int& c_, const int& n_){
 		couleur = couleur_;
 		x = x_;
 		y = y_;
 		c = c_;
+		n = n_;
 	}
 
 	friend bool operator<(const Position& p1, const Position& p2)
     {
-		int t1 = p1.c * 49 + p1.y * 7 + p1.x;
-		int t2 = p2.c * 49 + p2.y * 7 + p2.x;
+		int t1 = p1.c * (p1.n*p1.n) + p1.y * p1.n + p1.x;
+		int t2 = p2.c * (p1.n*p1.n) + p2.y * p1.n + p2.x;
 		if(t1 < t2){
 			return true;
 		}
 		return false;
     }
+
+	friend bool operator==(const Position& p1, const Position& p2){
+		if(p1.c == p2.c && p1.couleur == p2.couleur && p1.x == p2.x && p1.y == p2.y)
+			return true;
+		return false;
+	}
 };
 
 
@@ -92,41 +101,69 @@ public:
 	}
 
 	void plusCourtChemin(int x_depart, int y_depart, int couleur_depart, int x_destination, int y_destination) {
-		std::cerr << "TODO : calculer le plus court chemin depuis (" << x_depart << ", " << y_depart << ") avec la couleur " << couleur_depart << " vers (" << x_destination << ", " << y_destination << ")" << std::endl;
 		int distance[graph.sommets.size()];
 		Position precedent[graph.sommets.size()];
+		Position target(0, x_destination, y_destination, 0, N);
+		char directionPrecedente[graph.sommets.size()];
 		vector<Position> visite;
-		Position nonVisite[graph.sommets.size()];
+		vector<bool> nonVisite;
+		int indexDebut;
 		for(int i = 0; i < graph.sommets.size(); i++){
 			distance[i] = 1000000;
 			visite.push_back(graph.sommets[i].position);
+			nonVisite.push_back(false);
 		}
-		int index = graph.getIDSommet(Position(0, x_depart, y_depart, couleur_depart));
-		distance[index] = 0;
+		indexDebut = graph.getIDSommet(Position(0, x_depart, y_depart, couleur_depart, N));
+		distance[indexDebut] = 0;
 
-		while(!visite.empty()){
-			int index = plusPetit(distance, visite);
+		for(int i =0; i < visite.size(); i++){
+			int index = plusPetit(distance, nonVisite);
+			nonVisite[index] = true;
 			Position position = visite[index];
-			visite.erase(visite.begin()+index);
+			if(target == position) break;
+			//visite.erase(visite.begin()+index);
 			auto mapArete = graph.sommets[graph.getIDSommet(position)].areteSortantes;
 			int distCourante;
 			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
-				auto paireTemporaire = iter->second;
-				cout<<paireTemporaire.first<< " ";
-				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second;
-				if(distCourante < distance[graph.getIDSommet(graph.getPosition(iter->first))]){
-					distance[graph.getIDSommet(graph.getPosition(iter->first))] = distCourante;
+				if(!nonVisite[iter->first]){
+					auto paireTemporaire = iter->second;
+					distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second;
+					if(distCourante < distance[graph.getIDSommet(graph.getPosition(iter->first))]){
+						distance[graph.getIDSommet(graph.getPosition(iter->first))] = distCourante;
+						precedent[graph.getIDSommet(graph.getPosition(iter->first))] = position;
+						directionPrecedente[graph.getIDSommet(graph.getPosition(iter->first))] = paireTemporaire.first;
+					}
 				}
 			}
 		}
 
 
+		vector<char> fin;
+		int res = distance[graph.getIDSommet(target)];
+		if(directionPrecedente[graph.getIDSommet(target)] =='c')
+			res -= 2;
+		else
+			res -= 1;
+		target = precedent[graph.getIDSommet(target)];
+		while(graph.getIDSommet(target) != indexDebut){
+			int id = graph.getIDSommet(target);
+			fin.insert(fin.begin(),directionPrecedente[id]);
+			target = precedent[graph.getIDSommet(target)];
+		}
+		if(graph.getPosition(indexDebut) == target){
+			int id = graph.getIDSommet(target);
+			fin.insert(fin.begin(),directionPrecedente[id]);
+		}
+		for(int i = 1; i < fin.size(); i++){
+			cout << fin[i] << " ";
+		}
+		cout << res <<endl;
 	}
 
-	int plusPetit(int distance[], vector<Position> visite){
+	int plusPetit(int distance[], vector<bool> nonVisite){
 		int minimum = 10000000, valeurDeRetour = 100000000;
-		for(int i = 0; i < visite.size(); i++){
-			if(distance[i] <= minimum){
+		for(int i = 0; i < nonVisite.size(); i++){
+			if(distance[i] <= minimum && !nonVisite[i]){
 				minimum = distance[i];
 				valeurDeRetour = i;
 			}
@@ -158,21 +195,16 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 
 		for(int i = 0; i<univers.N; i++) {
 			for(int j = 0; j<univers.N; j++) {
-				Position position(vectorCouleur[i*univers.N + j], j, i, c);
+				Position position(vectorCouleur[i*univers.N + j], j, i, c, univers.N);
 				univers.graph.ajouterSommet(position);
-				cout << position.x << "," << position.y << " " << position.couleur << "   ";
-				//std::cerr << "TODO : considérer la cellule (" << x << ", " << y << ") est de couleur " << couleur << std::endl;
 			}
-			cout << endl;
 		}
-		cout << endl;
 	}
 
 	int couleurUnivers;
 	int couleurSommet;
 
 	for(int i = 0; i < univers.graph.sommets.size(); i++){
-		Position p = univers.graph.sommets[i].position;
 		if(i-univers.N >= 0 && i / (univers.N * univers.N) == (i - univers.N) / (univers.N * univers.N) && i / (univers.N * univers.N) != univers.graph.sommets[i - univers.N].position.couleur)
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, make_pair('h',1));
 
@@ -195,21 +227,6 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (abs(couleurSommet-couleurUnivers)*univers.N*univers.N)].position, make_pair('c',2));
 		}
 	}
-
-	/*for(unsigned int c = 0; c<univers.C; c++){
-
-		for(unsigned int i = 0; i<univers.N; i++) {
-			for(unsigned int j = 0; j<univers.N; j++) {
-				Position position(vectorCouleur[i*univers.N + j], j, i, c);
-				univers.graph.ajouterSommet(position);
-				cout << position.x << "," << position.y << " " << position.c << "   ";
-				//std::cerr << "TODO : considérer la cellule (" << x << ", " << y << ") est de couleur " << couleur << std::endl;
-			}
-			cout << endl;
-		}
-		cout << endl;
-	}*/
-
 	return is;
 }
 
