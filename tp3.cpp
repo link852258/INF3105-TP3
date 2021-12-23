@@ -64,9 +64,12 @@ public:
 
 	friend bool operator<(const Position& p1, const Position& p2)
     {
-		if(p1.c < p2.c || p1.x < p2.x || p1.y < p2.y)
+		int t1 = p1.c * 49 + p1.y * 7 + p1.x;
+		int t2 = p2.c * 49 + p2.y * 7 + p2.x;
+		if(t1 < t2){
 			return true;
-        return false;
+		}
+		return false;
     }
 };
 
@@ -109,6 +112,7 @@ public:
 			int distCourante;
 			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
 				auto paireTemporaire = iter->second;
+				cout<<paireTemporaire.first<< " ";
 				distCourante = distance[graph.getIDSommet(position)] + paireTemporaire.second;
 				if(distCourante < distance[graph.getIDSommet(graph.getPosition(iter->first))]){
 					distance[graph.getIDSommet(graph.getPosition(iter->first))] = distCourante;
@@ -169,23 +173,26 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 
 	for(int i = 0; i < univers.graph.sommets.size(); i++){
 		Position p = univers.graph.sommets[i].position;
-		if(i-univers.N >= 0 && i / (univers.N * univers.N) == (i - univers.N) / (univers.N * univers.N))
+		if(i-univers.N >= 0 && i / (univers.N * univers.N) == (i - univers.N) / (univers.N * univers.N) && i / (univers.N * univers.N) != univers.graph.sommets[i - univers.N].position.couleur)
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-univers.N].position, make_pair('h',1));
-		if((i+1) % univers.N != 0) 
+
+		if((i+1) % univers.N != 0 && i / (univers.N * univers.N) != univers.graph.sommets[i+1].position.couleur) 
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+1].position, make_pair('d',1));
-		if(i+univers.N < univers.graph.sommets.size()) 
+
+		if(i+univers.N < univers.graph.sommets.size() && i / (univers.N * univers.N) != univers.graph.sommets[i+univers.N].position.couleur) 
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i+univers.N].position, make_pair('b',1));
-		if((i-1) % univers.N == 6) 
+
+		if((i-1) % univers.N != 6 && i-1 >= 0 && i / (univers.N * univers.N) != univers.graph.sommets[i-1].position.couleur) 
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i-1].position, make_pair('g',1));
 
 		couleurUnivers = univers.graph.sommets[i].position.c;
 		couleurSommet = univers.graph.sommets[i].position.couleur;
 
 		if(couleurSommet != couleurUnivers && couleurSommet < couleurUnivers){
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i - (couleurUnivers-couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i - (abs(couleurSommet-couleurUnivers)*univers.N*univers.N)].position, make_pair('c',2));
 		}
 		if(couleurSommet != couleurUnivers && couleurSommet > couleurUnivers){
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (couleurUnivers+couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (abs(couleurSommet-couleurUnivers)*univers.N*univers.N)].position, make_pair('c',2));
 		}
 	}
 
