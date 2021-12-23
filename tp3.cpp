@@ -102,16 +102,18 @@ public:
 
 	void plusCourtChemin(int x_depart, int y_depart, int couleur_depart, int x_destination, int y_destination) {
 		int distance[graph.sommets.size()];
-		Position precedent[graph.sommets.size()];
+		vector<Position> precedent;
 		Position target(0, x_destination, y_destination, 0, N);
 		char directionPrecedente[graph.sommets.size()];
 		vector<Position> visite;
 		vector<bool> nonVisite;
 		int indexDebut;
+		Position p;
 		for(int i = 0; i < graph.sommets.size(); i++){
 			distance[i] = 1000000;
 			visite.push_back(graph.sommets[i].position);
 			nonVisite.push_back(false);
+			precedent.push_back(p);
 		}
 		indexDebut = graph.getIDSommet(Position(0, x_depart, y_depart, couleur_depart, N));
 		distance[indexDebut] = 0;
@@ -121,7 +123,6 @@ public:
 			nonVisite[index] = true;
 			Position position = visite[index];
 			if(target == position) break;
-			//visite.erase(visite.begin()+index);
 			auto mapArete = graph.sommets[graph.getIDSommet(position)].areteSortantes;
 			int distCourante;
 			for(auto iter = mapArete.begin(); iter != mapArete.end(); ++iter){
