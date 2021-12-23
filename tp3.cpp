@@ -64,7 +64,9 @@ public:
 
 	friend bool operator<(const Position& p1, const Position& p2)
     {
-		if(p1.c < p2.c || p1.x < p2.x || p1.y < p2.y)
+		int t1 = p1.c * 49 + p1.x + p1.y * 7;
+		int t2 = p2.c * 49 + p2.x + p2.y * 7;
+		if(t1 < t2)
 			return true;
         return false;
     }
@@ -185,7 +187,8 @@ std::istream& operator >> (std::istream& is, Univers& univers) {
 			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i - (couleurUnivers-couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
 		}
 		if(couleurSommet != couleurUnivers && couleurSommet > couleurUnivers){
-			univers.graph.ajouterArete(univers.graph.sommets[i].position, univers.graph.sommets[i + (couleurUnivers+couleurSommet*univers.N*univers.N)].position, make_pair('c',2));
+			Position po = univers.graph.sommets[i + (couleurUnivers+couleurSommet*univers.N*univers.N)].position;
+			univers.graph.ajouterArete(univers.graph.sommets[i].position, po , make_pair('c',2));
 		}
 	}
 
